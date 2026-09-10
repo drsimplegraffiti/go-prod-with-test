@@ -1,0 +1,143 @@
+### goapi - manual API test file
+### Works with the VS Code "REST Client" extension (humao.rest-client)
+### or JetBrains' built-in HTTP client (IntelliJ/GoLand/WebStorm).
+### Click "Send Request" above each block, top to bottom.
+### Requests reference earlier responses by name, e.g. {{login.response.body.$.access_token}}
+
+@baseUrl = http://localhost:8080
+@email = jane@example.com
+@password = supersecret123
+
+### Health check
+GET {{baseUrl}}/healthz
+
+### Readiness check (verifies DB connectivity)
+GET {{baseUrl}}/readyz
+
+
+### =========================
+### AUTH
+### =========================
+
+### Register a new user
+# @name register
+POST http://localhost:8080/api/v1/auth/register
+Content-Type: application/json
+
+{
+  "email": "abayomiogunnusi@gmail.com",
+  "password": "admin1234",
+  "name": "Jane Doe"
+}
+
+### Login (use this if the user already exists)
+# @name login
+POST http://localhost:8080/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "abayomiogunnusi@gmail.com",
+  "password": "admin1234"
+}
+
+### Refresh access token using the refresh token from login/register
+# @name refresh
+POST http://localhost:8080/api/v1/auth/refresh
+Content-Type: application/json
+
+{
+  "refresh_token": "{{login.response.body.$.refresh_token}}"
+}
+
+
+### =========================
+### POSTS
+### =========================
+
+### Create a post (requires auth - uses access token from login above)
+# @name createPost
+POST http://localhost:8080/api/v1/posts
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.$.access_token}}
+
+{
+  "title": "My First Post",
+  "content": "Hello from the client.http file!",
+  "status": "published"
+}
+
+### List posts - defaults (page 1, page_size 20, newest first)
+GET http://localhost:8080/api/v1/posts
+
+### List posts - pagination
+GET http://localhost:8080/api/v1/posts?page=1&page_size=5
+
+### List posts - filter by status
+GET http://localhost:8080/api/v1/posts?status=published
+
+### List posts - filter by author
+GET http://localhost:8080/api/v1/posts?user_id={{login.response.body.$.user.id}}
+
+### List posts - search by title (case-insensitive substring)
+GET http://localhost:8080/api/v1/posts?search=first
+
+### List posts - sort by title ascending
+GET http://localhost:8080/api/v1/posts?sort_by=title&sort_dir=asc
+
+### List posts - combined: filter + search + sort + pagination
+GET http://localhost:8080/api/v1/posts?status=published&search=post&sort_by=created_at&sort_dir=desc&page=1&page_size=10
+
+### Get a single post by ID
+GET http://localhost:8080/api/v1/posts/{{createPost.response.body.$.id}}
+
+### Update a post (requires auth, must be the owner)
+PATCH http://localhost:8080/api/v1/posts/{{createPost.response.body.$.id}}
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.$.access_token}}
+
+{
+  "title": "My First Post (edited)",
+  "status": "archived"
+}
+
+### Delete a post (requires auth, must be the owner)
+DELETE http://localhost:8080/api/v1/posts/{{createPost.response.body.$.id}}
+Authorization: Bearer {{login.response.body.$.access_token}}
+
+
+### =========================
+### ERROR CASES (useful for sanity-checking)
+### =========================
+
+### Create post without auth -> 401
+POST http://localhost:8080/api/v1/posts
+Content-Type: application/json
+
+{
+  "title": "Should fail"
+}
+
+### Register with a weak password -> 400
+POST http://localhost:8080/api/v1/auth/register
+Content-Type: application/json
+
+{
+  "email": "weak@example.com",
+  "password": "short",
+  "name": "Weak Password"
+}
+
+### Login with wrong password -> 401
+POST http://localhost:8080/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "abayomiogunnusi@gmail.com",
+  "password": "totally-wrong-password"
+}
+
+### List posts with invalid status filter -> 400
+GET http://localhost:8080/api/v1/posts?status=not-a-real-status
+
+### Get a post that doesn't exist -> 404
+GET http://localhost:8080/api/v1/posts/00000000-0000-0000-0000-000000000000
