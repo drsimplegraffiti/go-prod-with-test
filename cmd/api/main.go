@@ -6,11 +6,13 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/example/goapi/internal/config"
 	"github.com/example/goapi/internal/database"
@@ -39,6 +41,12 @@ func run() error {
 		return err
 	}
 
+	// Fail fast on a dangerously weak signing secret instead of discovering
+	// it in production.
+	if len(cfg.JWTSecret) < 32 {
+		return fmt.Errorf("JWT_SECRET must be at least 32 characters")
+	}
+
 	db, err := database.New(cfg.DatabaseURL)
 	if err != nil {
 		return err
@@ -49,14 +57,20 @@ func run() error {
 		return err
 	}
 
-	handler := router.New(db, cfg)
+	handler, err := router.New(db, cfg)
+	if err != nil {
+		slog.Error("unable to create router", "error", err)
+		return err
+	}
 
 	srv := &http.Server{
-		Addr:         ":" + cfg.Port,
-		Handler:      handler,
-		ReadTimeout:  cfg.ReadTimeout,
-		WriteTimeout: cfg.WriteTimeout,
-		IdleTimeout:  cfg.IdleTimeout,
+		Addr:              ":" + cfg.Port,
+		Handler:           handler,
+		ReadTimeout:       cfg.ReadTimeout,
+		ReadHeaderTimeout: 5 * time.Second, // slowloris protection
+		WriteTimeout:      cfg.WriteTimeout,
+		IdleTimeout:       cfg.IdleTimeout,
+		MaxHeaderBytes:    1 << 20, // 1 MiB
 	}
 
 	serverErrs := make(chan error, 1)

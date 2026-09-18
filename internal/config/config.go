@@ -34,6 +34,9 @@ type Config struct {
 	CloudinaryCloudName string
 	CloudinaryAPIKey    string
 	CloudinaryAPISecret string
+
+	AllowedOrigins []string // e.g. []string{"https://app.example.com"}; use ["*"] only in dev
+	TrustXFF       bool     // true only when behind a proxy/LB you control
 }
 
 // Load builds a Config from environment variables, applying sane defaults
@@ -63,6 +66,9 @@ func Load() (*Config, error) {
 		CloudinaryCloudName: getEnv("CLOUDINARY_CLOUD_NAME", ""),
 		CloudinaryAPIKey:    getEnv("CLOUDINARY_API_KEY", ""),
 		CloudinaryAPISecret: getEnv("CLOUDINARY_API_SECRET", ""),
+
+		AllowedOrigins: []string{getEnv("ALLOWED_ORIGINS", "*")},
+		TrustXFF:       getEnv("TRUST_XFF", "false") == "true",
 	}
 
 	if cfg.JWTSecret == "" {
