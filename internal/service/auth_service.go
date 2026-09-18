@@ -4,8 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"strings"
 
+	"github.com/example/goapi/internal/email"
 	"github.com/example/goapi/internal/models"
 	"github.com/example/goapi/internal/repository"
 	"github.com/example/goapi/internal/utils"
@@ -23,12 +25,20 @@ var ErrEmailTaken = errors.New("email is already registered")
 type AuthService struct {
 	users      *repository.UserRepository
 	jwt        *utils.JWTManager
+	email      *email.Service
 	bcryptCost int
 }
 
 // NewAuthService constructs an AuthService.
-func NewAuthService(users *repository.UserRepository, jwt *utils.JWTManager, bcryptCost int) *AuthService {
-	return &AuthService{users: users, jwt: jwt, bcryptCost: bcryptCost}
+func NewAuthService(users *repository.UserRepository, jwt *utils.JWTManager,
+	emailService *email.Service,
+	bcryptCost int,
+) *AuthService {
+	return &AuthService{
+		users: users, jwt: jwt,
+		email:      emailService,
+		bcryptCost: bcryptCost,
+	}
 }
 
 // Register creates a new user account and returns freshly issued tokens.
@@ -36,6 +46,10 @@ func (s *AuthService) Register(ctx context.Context, req models.RegisterRequest) 
 	email := normalizeEmail(req.Email)
 	if err := validateRegisterRequest(email, req.Password, req.Name); err != nil {
 		return nil, err
+	}
+
+	if _, err := s.users.GetByEmail(ctx, email); err == nil {
+		return nil, ErrEmailTaken
 	}
 
 	hash, err := utils.HashPassword(req.Password, s.bcryptCost)
@@ -58,7 +72,21 @@ func (s *AuthService) Register(ctx context.Context, req models.RegisterRequest) 
 		return nil, fmt.Errorf("create user: %w", err)
 	}
 
+	s.email.SendWelcomeEmail(
+		created.Email,
+		created.Name,
+	)
+
 	return s.issueTokens(created)
+}
+
+func (s *AuthService) LoginAttempt(ctx context.Context, ip string) error {
+	slog.Info(
+		"login attempt",
+		"ip", ip,
+	)
+
+	return nil
 }
 
 // Login verifies credentials and issues new tokens on success.

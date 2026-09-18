@@ -16,6 +16,7 @@ import (
 	"github.com/example/goapi/internal/database"
 	"github.com/example/goapi/internal/migrations"
 	"github.com/example/goapi/internal/router"
+	"github.com/joho/godotenv"
 )
 
 func main() {
@@ -29,6 +30,10 @@ func main() {
 }
 
 func run() error {
+	if err := godotenv.Load(); err != nil {
+		slog.Warn("no .env file found", "error", err)
+	}
+
 	cfg, err := config.Load()
 	if err != nil {
 		return err

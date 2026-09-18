@@ -46,11 +46,26 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	ip := utils.GetClientIP(r)
+
+	if err := h.auth.LoginAttempt(r.Context(), ip); err != nil {
+		writeAuthError(w, err)
+		return
+	}
+
 	resp, err := h.auth.Login(r.Context(), req)
 	if err != nil {
 		writeAuthError(w, err)
 		return
 	}
+
+	utils.SetCookie(w, &http.Cookie{
+		Name:     "refresh_token",
+		Value:    resp.RefreshToken,
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+		Secure:   true,
+	})
 
 	utils.WriteJSON(w, http.StatusOK, resp)
 }

@@ -44,3 +44,24 @@ func DecodeJSON(r *http.Request, dst interface{}) error {
 	}
 	return nil
 }
+
+func SetCookie(w http.ResponseWriter, cookie *http.Cookie) {
+	w.Header().Set("Set-Cookie", cookie.String())
+} // SetCookie
+
+func setCookie(w http.ResponseWriter, name, value string) {
+	cookie := &http.Cookie{
+		Name:  name,
+		Value: value,
+		Path:  "/",
+	}
+	SetCookie(w, cookie)
+}
+
+func ReadCookie(r *http.Request, name string) string {
+	cookie, err := r.Cookie(name)
+	if err != nil {
+		return ""
+	}
+	return cookie.Value
+}

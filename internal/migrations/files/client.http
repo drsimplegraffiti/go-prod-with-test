@@ -27,7 +27,7 @@ Content-Type: application/json
 {
   "email": "abayomiogunnusi@gmail.com",
   "password": "admin1234",
-  "name": "Jane Doe"
+  "name": "Dude Doe"
 }
 
 ### Login (use this if the user already exists)
@@ -141,3 +141,60 @@ GET http://localhost:8080/api/v1/posts?status=not-a-real-status
 
 ### Get a post that doesn't exist -> 404
 GET http://localhost:8080/api/v1/posts/00000000-0000-0000-0000-000000000000
+
+
+### Get authenticated user's profile
+
+GET http://localhost:8080/api/v1/profile
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiJkNGViOTJjNy0xMzI1LTQxOGQtOTExNC1hYWIxODEzZDcwYmEiLCJyb2xlIjoidXNlciIsInR5cCI6ImFjY2VzcyIsImlzcyI6ImdvYXBpIiwic3ViIjoiZDRlYjkyYzctMTMyNS00MThkLTkxMTQtYWFiMTgxM2Q3MGJhIiwiZXhwIjoxNzg5NzMwMTA3LCJpYXQiOjE3ODk3MjkyMDd9.Ps3dSG_v7_Hb3KeNjsc9R6aBcHLZdEHfiMkW1N9C83w
+
+### Update authenticated user's profile
+
+PATCH http://localhost:8080/api/v1/profile/update
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiIxOWZjNjFjOC05YjRjLTQxMGItOWJiYS05N2FiMjQ3MDM5YmQiLCJyb2xlIjoidXNlciIsInR5cCI6ImFjY2VzcyIsImlzcyI6ImdvYXBpIiwic3ViIjoiMTlmYzYxYzgtOWI0Yy00MTBiLTliYmEtOTdhYjI0NzAzOWJkIiwiZXhwIjoxNzg5NzI4OTU2LCJpYXQiOjE3ODk3MjgwNTZ9.8H_XOxCp12N4sGbdAn4KJ6s-PriORnAPgDnoIBpkOTM
+
+
+{
+"name": "Dude Updated",
+"email": "abayomiogunnusi@gmail.com"
+}
+
+### Update profile - name only
+
+PATCH http://localhost:8080/api/v1/profile/update
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiJkNGViOTJjNy0xMzI1LTQxOGQtOTExNC1hYWIxODEzZDcwYmEiLCJyb2xlIjoidXNlciIsInR5cCI6ImFjY2VzcyIsImlzcyI6ImdvYXBpIiwic3ViIjoiZDRlYjkyYzctMTMyNS00MThkLTkxMTQtYWFiMTgxM2Q3MGJhIiwiZXhwIjoxNzg5NzMwMzM1LCJpYXQiOjE3ODk3Mjk0MzV9.salS7dzge5S8b7g7Z_L28Z6_0SDNwcM313W4I_bI__g
+
+
+{
+"name": "Dude Doe Updated"
+}
+
+### Update profile - email only
+
+PATCH http://localhost:8080/api/v1/profile
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.$.access_token}}
+
+{
+"email": "abayomiogunnusi@gmail.com"
+}
+
+### Upload / update authenticated user's avatar
+
+POST http://localhost:8080/api/v1/profile/avatar
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiJkNGViOTJjNy0xMzI1LTQxOGQtOTExNC1hYWIxODEzZDcwYmEiLCJyb2xlIjoidXNlciIsInR5cCI6ImFjY2VzcyIsImlzcyI6ImdvYXBpIiwic3ViIjoiZDRlYjkyYzctMTMyNS00MThkLTkxMTQtYWFiMTgxM2Q3MGJhIiwiZXhwIjoxNzg5NzMwMzM1LCJpYXQiOjE3ODk3Mjk0MzV9.salS7dzge5S8b7g7Z_L28Z6_0SDNwcM313W4I_bI__g
+Content-Type: multipart/form-data; boundary=AvatarBoundary
+
+--AvatarBoundary
+Content-Disposition: form-data; name="avatar"; filename="me.jpg"
+Content-Type: image/jpeg
+
+< ./testdata/me.jpg
+--AvatarBoundary--
+
+### Get profile again after updating it
+
+GET http://localhost:8080/api/v1/profile
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiJkNGViOTJjNy0xMzI1LTQxOGQtOTExNC1hYWIxODEzZDcwYmEiLCJyb2xlIjoidXNlciIsInR5cCI6ImFjY2VzcyIsImlzcyI6ImdvYXBpIiwic3ViIjoiZDRlYjkyYzctMTMyNS00MThkLTkxMTQtYWFiMTgxM2Q3MGJhIiwiZXhwIjoxNzg5NzMwMzM1LCJpYXQiOjE3ODk3Mjk0MzV9.salS7dzge5S8b7g7Z_L28Z6_0SDNwcM313W4I_bI__g

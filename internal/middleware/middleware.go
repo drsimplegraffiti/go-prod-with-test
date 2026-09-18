@@ -1,9 +1,11 @@
 package middleware
 
 import (
+	"bytes"
 	"context"
 	"crypto/rand"
 	"encoding/hex"
+	"io"
 	"log/slog"
 	"net/http"
 	"sync"
@@ -225,5 +227,48 @@ func Chain(mws ...func(http.Handler) http.Handler) func(http.Handler) http.Handl
 			h = mws[i](h)
 		}
 		return h
+	}
+}
+
+// bodyDumpRecorder captures everything written to the response, in addition
+// to the status code, by teeing each Write() into an in-memory buffer while
+// still passing it through to the real ResponseWriter.
+type bodyDumpRecorder struct {
+	http.ResponseWriter
+	status int
+	body   bytes.Buffer
+}
+
+func (r *bodyDumpRecorder) WriteHeader(code int) {
+	r.status = code
+	r.ResponseWriter.WriteHeader(code)
+}
+
+func (r *bodyDumpRecorder) Write(b []byte) (int, error) {
+	r.body.Write(b)
+	return r.ResponseWriter.Write(b)
+}
+
+// The request body is fully read into memory up front and then replaced
+// with a fresh reader, so downstream handlers can still consume r.Body
+// normally. Because both bodies are buffered in full for the lifetime of
+// the request, avoid wiring this into routes that stream large uploads or
+// downloads (file transfers, SSE, etc.) — it's meant for typical JSON APIs.
+func BodyDump(fn func(r *http.Request, status int, duration time.Duration, reqBody, resBody []byte)) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			var reqBody []byte
+			if r.Body != nil {
+				reqBody, _ = io.ReadAll(r.Body)
+				r.Body.Close()
+				r.Body = io.NopCloser(bytes.NewReader(reqBody))
+			}
+
+			start := time.Now()
+			rec := &bodyDumpRecorder{ResponseWriter: w, status: http.StatusOK}
+			next.ServeHTTP(rec, r)
+
+			fn(r, rec.status, time.Since(start), reqBody, rec.body.Bytes())
+		})
 	}
 }

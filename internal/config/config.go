@@ -24,6 +24,16 @@ type Config struct {
 	ShutdownTimeout time.Duration
 	BcryptCost      int
 	RateLimitRPS    int
+
+	EmailHost     string
+	EmailPort     string
+	EmailUsername string
+	EmailPassword string
+	EmailFrom     string
+
+	CloudinaryCloudName string
+	CloudinaryAPIKey    string
+	CloudinaryAPISecret string
 }
 
 // Load builds a Config from environment variables, applying sane defaults
@@ -43,6 +53,16 @@ func Load() (*Config, error) {
 		ShutdownTimeout: getDurationEnv("HTTP_SHUTDOWN_TIMEOUT", 15*time.Second),
 		BcryptCost:      getIntEnv("BCRYPT_COST", 12),
 		RateLimitRPS:    getIntEnv("RATE_LIMIT_RPS", 10),
+
+		EmailHost:     getEnv("SMTP_HOST", "smtp.gmail.com"),
+		EmailPort:     getEnv("SMTP_PORT", "587"),
+		EmailUsername: getEnv("SMTP_USERNAME", ""),
+		EmailPassword: getEnv("SMTP_PASSWORD", ""),
+		EmailFrom:     getEnv("SMTP_FROM", ""),
+
+		CloudinaryCloudName: getEnv("CLOUDINARY_CLOUD_NAME", ""),
+		CloudinaryAPIKey:    getEnv("CLOUDINARY_API_KEY", ""),
+		CloudinaryAPISecret: getEnv("CLOUDINARY_API_SECRET", ""),
 	}
 
 	if cfg.JWTSecret == "" {
