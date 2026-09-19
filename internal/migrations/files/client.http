@@ -25,9 +25,9 @@ POST http://localhost:8080/api/v1/auth/register
 Content-Type: application/json
 
 {
-  "email": "jude@yopmail.com",
+  "email": "dele@yopmail.com",
   "password": "admin1234",
-  "name": "Dude Doe"
+  "name": "Dele Doe"
 }
 
 ### Login (use this if the user already exists)
@@ -58,10 +58,11 @@ Content-Type: application/json
 # @name createPost
 POST http://localhost:8080/api/v1/posts
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI0ODNlMzA5My00ZWNlLTRkMjgtYTg5MS00ZDJiZGMxMDQ5MmMiLCJyb2xlIjoidXNlciIsInR5cCI6ImFjY2VzcyIsImlzcyI6ImdvYXBpIiwic3ViIjoiNDgzZTMwOTMtNGVjZS00ZDI4LWE4OTEtNGQyYmRjMTA0OTJjIiwiZXhwIjoxNzg5NzQ2NDA1LCJpYXQiOjE3ODk3NDU1MDV9.T_o-Vfaq2QQ6dh2pnOsZYVRc4xZfGpy-BcWuby5t-uo
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI0ODNlMzA5My00ZWNlLTRkMjgtYTg5MS00ZDJiZGMxMDQ5MmMiLCJyb2xlIjoidXNlciIsInR5cCI6ImFjY2VzcyIsImlzcyI6ImdvYXBpIiwic3ViIjoiNDgzZTMwOTMtNGVjZS00ZDI4LWE4OTEtNGQyYmRjMTA0OTJjIiwiZXhwIjoxNzg5NzU5Njc4LCJpYXQiOjE3ODk3NTg3Nzh9.tXMIgBvRmmFSn_xQYU9iTYogHgohz4i2mcfHdMZ2-mU
+Idempotency-Key: "1234556"
 
 {
-  "title": "My First Post",
+  "title": "My First Post yy",
   "content": "Hello from the client.http file!",
   "status": "published"
 }

@@ -57,7 +57,16 @@ func run() error {
 		return err
 	}
 
-	handler, err := router.New(db, cfg)
+	// handler, err := router.New(db, cfg)
+
+	ctx, stop := signal.NotifyContext(
+		context.Background(),
+		os.Interrupt,
+		syscall.SIGTERM,
+	)
+	defer stop()
+
+	handler, err := router.New(ctx, db, cfg)
 	if err != nil {
 		slog.Error("unable to create router", "error", err)
 		return err

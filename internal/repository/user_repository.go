@@ -5,8 +5,11 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"time"
 
+	"github.com/example/goapi/internal/events"
 	"github.com/example/goapi/internal/models"
+	"github.com/google/uuid"
 	"github.com/lib/pq"
 )
 
@@ -24,6 +27,101 @@ type UserRepository struct {
 // NewUserRepository constructs a UserRepository.
 func NewUserRepository(db *sql.DB) *UserRepository {
 	return &UserRepository{db: db}
+}
+
+func (r *UserRepository) CreateWithOutbox(
+	ctx context.Context,
+	user *models.User,
+	outbox *OutboxRepository,
+) (*models.User, error) {
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, fmt.Errorf("begin registration transaction: %w", err)
+	}
+	defer tx.Rollback()
+
+	const query = `
+		INSERT INTO users (
+			email,
+			password_hash,
+			name,
+			role
+		)
+		VALUES ($1, $2, $3, $4)
+		RETURNING
+			id,
+			email,
+			password_hash,
+			name,
+			role,
+			created_at,
+			updated_at
+	`
+
+	created := &models.User{}
+
+	err = tx.QueryRowContext(
+		ctx,
+		query,
+		user.Email,
+		user.PasswordHash,
+		user.Name,
+		user.Role,
+	).Scan(
+		&created.ID,
+		&created.Email,
+		&created.PasswordHash,
+		&created.Name,
+		&created.Role,
+		&created.CreatedAt,
+		&created.UpdatedAt,
+	)
+	if err != nil {
+		if isUniqueViolation(err) {
+			return nil, ErrDuplicate
+		}
+
+		return nil, fmt.Errorf("insert user: %w", err)
+	}
+
+	event := events.WalletCreationRequested{
+		EventID:    uuid.NewString(),
+		CustomerID: created.ID,
+		CreatedBy:  "system",
+		OccurredAt: time.Now().UTC(),
+	}
+
+	payload, err := event.Marshal()
+	if err != nil {
+		return nil, fmt.Errorf("marshal wallet event: %w", err)
+	}
+
+	if err := outbox.Create(
+		ctx,
+		tx,
+		events.WalletCreationRequestedName,
+		"user",
+		created.ID,
+		payload,
+	); err != nil {
+		return nil, fmt.Errorf("create wallet outbox event: %w", err)
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, fmt.Errorf("commit registration: %w", err)
+	}
+
+	return created, nil
+}
+
+func isUniqueViolation(err error) bool {
+	var pqErr *pq.Error
+
+	if errors.As(err, &pqErr) {
+		return pqErr.Code == "23505"
+	}
+
+	return false
 }
 
 // Create inserts a new user and returns the fully populated record.
