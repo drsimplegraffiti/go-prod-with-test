@@ -57,8 +57,6 @@ func run() error {
 		return err
 	}
 
-	// handler, err := router.New(db, cfg)
-
 	ctx, stop := signal.NotifyContext(
 		context.Background(),
 		os.Interrupt,

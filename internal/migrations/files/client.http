@@ -36,7 +36,7 @@ POST http://localhost:8080/api/v1/auth/login
 Content-Type: application/json
 
 {
-  "email": "jude@yopmail.com",
+  "email": "dele@yopmail.com",
   "password": "admin1234"
 }
 
@@ -58,7 +58,7 @@ Content-Type: application/json
 # @name createPost
 POST http://localhost:8080/api/v1/posts
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI0ODNlMzA5My00ZWNlLTRkMjgtYTg5MS00ZDJiZGMxMDQ5MmMiLCJyb2xlIjoidXNlciIsInR5cCI6ImFjY2VzcyIsImlzcyI6ImdvYXBpIiwic3ViIjoiNDgzZTMwOTMtNGVjZS00ZDI4LWE4OTEtNGQyYmRjMTA0OTJjIiwiZXhwIjoxNzg5NzU5Njc4LCJpYXQiOjE3ODk3NTg3Nzh9.tXMIgBvRmmFSn_xQYU9iTYogHgohz4i2mcfHdMZ2-mU
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiJjNjVhNmY5MC0zYjI0LTRjMzYtYTQ3OC1kZDQ2NjYzMGJlZGIiLCJyb2xlIjoidXNlciIsInR5cCI6ImFjY2VzcyIsImlzcyI6ImdvYXBpIiwic3ViIjoiYzY1YTZmOTAtM2IyNC00YzM2LWE0NzgtZGQ0NjY2MzBiZWRiIiwiZXhwIjoxNzg5ODQwNzQ1LCJpYXQiOjE3ODk4Mzk4NDV9.NiMEv6US0MnGLnHC7b8RMUp3MZgMZX6Xx1XB9szYysY
 Idempotency-Key: "1234556"
 
 {

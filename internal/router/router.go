@@ -13,6 +13,7 @@ import (
 	"github.com/example/goapi/internal/events"
 	"github.com/example/goapi/internal/file"
 	"github.com/example/goapi/internal/handlers"
+	"github.com/example/goapi/internal/httpclient"
 	"github.com/example/goapi/internal/middleware"
 	"github.com/example/goapi/internal/repository"
 	"github.com/example/goapi/internal/service"
@@ -80,6 +81,17 @@ func New(
 	}
 
 	profileService := service.NewProfileService(profileRepo, cloudinaryService)
+
+	httpclient.New(
+		httpclient.Config{
+			Timeout:      15 * time.Second,
+			MaxBodyBytes: 1 << 20,
+			MaxLogBytes:  64 << 10,
+			MaxRetries:   3,
+			RetryBase:    200 * time.Millisecond,
+		},
+		slog.Default(),
+	)
 
 	authService := service.NewAuthService(
 		userRepo,
