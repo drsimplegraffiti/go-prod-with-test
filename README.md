@@ -1,6 +1,9 @@
 # goapi
 
-A production-grade REST API built with **only the Go standard library's `net/http`** (Go 1.22+ method-aware routing) — no web framework. Includes JWT auth, bcrypt password hashing, pagination/filtering/sorting, SQL migrations, structured logging, graceful shutdown, and a full test suite.
+A production-grade REST API built with **only the Go standard library's
+`net/http`** (Go 1.22+ method-aware routing) — no web framework. Includes JWT
+auth, bcrypt password hashing, pagination/filtering/sorting, SQL migrations,
+    structured logging, graceful shutdown, and a full test suite.
 
 ## Stack
 
@@ -154,3 +157,6 @@ Response shape:
 - Add more tables the same way `posts` was added: migration -> model -> repository -> service -> handler -> route.
 - Swap in a real migration tool (e.g. `golang-migrate`) if you outgrow the hand-rolled runner.
 - Add OpenAPI/Swagger docs by hand or via a generator once the route surface stabilizes.
+
+
+psql -h localhost -p 5432 -U xybug -d goprod

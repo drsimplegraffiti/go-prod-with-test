@@ -58,11 +58,11 @@ Content-Type: application/json
 # @name createPost
 POST http://localhost:8080/api/v1/posts
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiJjNjVhNmY5MC0zYjI0LTRjMzYtYTQ3OC1kZDQ2NjYzMGJlZGIiLCJyb2xlIjoidXNlciIsInR5cCI6ImFjY2VzcyIsImlzcyI6ImdvYXBpIiwic3ViIjoiYzY1YTZmOTAtM2IyNC00YzM2LWE0NzgtZGQ0NjY2MzBiZWRiIiwiZXhwIjoxNzg5OTEzMDgwLCJpYXQiOjE3ODk5MTIxODB9.uz1DNTmpx_TOV2ub7Ehs_XqieQmEvzj5o05K_E45Kww
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI5NTkyOTUzMC04ZWI3LTQ5MGUtYTI3Yi0yMjYxMTQyZGEyYzQiLCJyb2xlIjoiZGVjMDkxYzMtYTA0MC00Njc0LTg5NjEtY2MzY2RhNWZmMTYzIiwidHlwIjoiYWNjZXNzIiwiaXNzIjoiZ29hcGkiLCJzdWIiOiI5NTkyOTUzMC04ZWI3LTQ5MGUtYTI3Yi0yMjYxMTQyZGEyYzQiLCJleHAiOjE3ODk5MjM1MjMsImlhdCI6MTc4OTkyMjYyM30.iVmL-7Cl72kW_sVHLbyRlcs98ywzCHTLZ717c3dv3Xw
 Idempotency-Key: "1234556"
 
 {
-  "title": "My First Post yy",
+  "title": "My First Posddt yy",
   "content": "Hello from the client.http file!",
   "status": "published"
 }

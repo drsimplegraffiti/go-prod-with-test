@@ -106,6 +106,10 @@ func New(
 	auditService := service.NewAuditService(requestLogRepo)
 	idempotencyService := service.NewIdempotencyService(idempotencyRepo)
 
+	rbacRepository := repository.NewRBACRepository(db)
+	rbacService := service.NewRBACService(rbacRepository)
+	rbacHandler := handlers.NewRBACHandler(rbacService)
+
 	authHandler := handlers.NewAuthHandler(authService)
 	postHandler := handlers.NewPostHandler(postService, idempotencyService)
 	healthHandler := handlers.NewHealthHandler(db)
@@ -117,8 +121,21 @@ func New(
 
 	registerHealthRoutes(mux, healthHandler)
 	registerAuthRoutes(mux, authHandler)
-	registerPostRoutes(mux, postHandler, authMW)
+
+	registerRBACRoutes(
+		mux,
+		rbacHandler,
+		authMW,
+		rbacService,
+	)
+	registerPostRoutes(
+		mux,
+		postHandler,
+		authMW,
+		rbacService,
+	)
 	registerProfileRoutes(mux, profileHandler, authMW)
+
 	registerNotFoundRoute(mux)
 
 	rateLimiter := middleware.NewRateLimiter(cfg.RateLimitRPS, cfg.TrustXFF)

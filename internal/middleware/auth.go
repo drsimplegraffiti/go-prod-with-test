@@ -38,8 +38,12 @@ func Auth(jwtManager *utils.JWTManager) func(http.Handler) http.Handler {
 				return
 			}
 
+			// ctx := context.WithValue(r.Context(), userIDKey, claims.UserID)
+			// ctx = context.WithValue(ctx, userRoleKey, claims.Role)
+
 			ctx := context.WithValue(r.Context(), userIDKey, claims.UserID)
 			ctx = context.WithValue(ctx, userRoleKey, claims.Role)
+
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
