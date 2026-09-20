@@ -31,6 +31,8 @@ import (
 	"net/http"
 
 	"github.com/example/goapi/internal/handlers"
+	"github.com/example/goapi/internal/middleware"
+	"github.com/example/goapi/internal/models"
 )
 
 // registerPostRoutes wires up the post endpoints — public reads, and writes
@@ -57,7 +59,21 @@ func registerPostRoutes(
 		authMW,
 	)
 
-	protected.HandleFunc("POST /", postHandler.Create)
-	protected.HandleFunc("PATCH /{id}", postHandler.Update)
-	protected.HandleFunc("DELETE /{id}", postHandler.Delete)
+	// protected.HandleFunc("POST /", postHandler.Create)
+	// protected.HandleFunc("PATCH /{id}", postHandler.Update)
+	// protected.HandleFunc("DELETE /{id}", postHandler.Delete)
+
+	protected.HandleFunc("POST /", postHandler.Create, middleware.RequirePermission(models.PermissionPostCreate))
+	protected.HandleFunc("PATCH /{id}", postHandler.Update, middleware.RequirePermission(models.PermissionPostUpdate))
+	protected.HandleFunc("DELETE /{id}", postHandler.Delete,
+		middleware.RequirePermission(models.PermissionPostCreate, models.PermissionPostRead))
+
+	protected.HandleFunc(
+		"POST /any",
+		postHandler.Create,
+		middleware.RequireAnyPermission(
+			models.PermissionPostCreate,
+			models.PermissionPostUpdate,
+		),
+	)
 }
